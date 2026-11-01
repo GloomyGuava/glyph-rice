@@ -44,7 +44,7 @@ PanelWindow {
             y: 14
             width: 64
             height: parent.height - 28
-            radius: 32
+            radius: Theme.state.barRadius
             color: Theme.s1
             border { width: 1; color: Theme.s2 }
 

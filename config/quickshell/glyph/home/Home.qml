@@ -11,9 +11,10 @@ import qs.services
 // «домашний экран» на слое bottom, прозрачный: часы Doto, приветствие и бенто виджетов. Сетка, шар и обои — под ним, в Back.
 // Окно открылось — всё уходит под него само. Опрос системы и анимации — только пока воркспейс пуст
 PanelWindow {
-    id: root
+	id: root
 
-    anchors { left: true; right: true; top: true; bottom: true }
+
+	anchors { left: true; right: true; top: true; bottom: true }
     exclusionMode: ExclusionMode.Ignore
     color: "transparent"
     WlrLayershell.layer: WlrLayer.Bottom
@@ -21,13 +22,13 @@ PanelWindow {
 
     readonly property bool home: (Hyprland.focusedWorkspace?.toplevels.values.length ?? 0) === 0
     Binding { target: SysStats; property: "detailed"; value: root.home || Sys.deckOpen }
-    // не в делегате: уничтоженный Binding значение не возвращает — убрал виджет, а cava работала бы вечно
+   //  не в делегате: уничтоженный Binding значение не возвращает — убрал виджет, а cava работала бы вечно
     Binding { target: Cava; property: "active"; value: root.home && bento.model.some(w => w.id === "cava") }
 
     SystemClock { id: clock; precision: SystemClock.Minutes }
     readonly property var en: Qt.locale("en_US")
 
-    // мигающее двоеточие — два кадра в секунду, а не анимация на каждый vsync
+   // мигающее двоеточие — два кадра в секунду, а не анимация на каждый vsync
     property bool dim: false
     Timer { running: root.home && Theme.state.blink; interval: 500; repeat: true; onTriggered: root.dim = !root.dim }
 
@@ -40,29 +41,32 @@ PanelWindow {
     }
 
     function week(d) { // ISO-неделя
-        const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+       const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
         t.setUTCDate(t.getUTCDate() + 4 - (t.getUTCDay() || 7));
-        return Math.ceil(((t - Date.UTC(t.getUTCFullYear(), 0, 1)) / 86400000 + 1) / 7);
+         return Math.ceil(((t - Date.UTC(t.getUTCFullYear(), 0, 1)) / 86400000 + 1) / 7);
     }
     readonly property string hello: { const h = clock.date.getHours(); return h < 5 ? "Good night" : h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening"; }
 
     Stage {
         id: stage
 
-        Row {
+	Row {
+	    visible: false
             x: 182
             y: 150
             Num { text: Theme.hh(clock.date); font.pixelSize: 300 }
             Num { text: ":"; font.pixelSize: 300; opacity: Theme.state.blink && root.dim ? 0.2 : 1 }
             Num { text: Qt.formatTime(clock.date, "mm"); font.pixelSize: 300 }
         }
-        Lb {
+	Lb {
+	    visible: false
             x: 190
             y: 448
             text: `${root.en.toString(clock.date, "dddd · d MMMM")} · week ${root.week(clock.date)}`
             px: 14
         }
-        Text {
+	Text {
+	    visible: false
             x: 188
             y: 560
             textFormat: Text.StyledText
@@ -71,7 +75,8 @@ PanelWindow {
             lineHeight: 1.1
             color: Theme.fg
         }
-        Row {
+	Row {
+	    visible: false
             x: 190
             y: 700
             spacing: 28

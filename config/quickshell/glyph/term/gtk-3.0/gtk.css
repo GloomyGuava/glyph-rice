@@ -44,7 +44,7 @@ entry { padding-left: 14px; padding-right: 14px; }
 .linked:not(.vertical) > button:not(:first-child), .linked:not(.vertical) > entry:not(:first-child) { border-top-left-radius: 0; border-bottom-left-radius: 0; }
 .linked:not(.vertical) > button:not(:last-child), .linked:not(.vertical) > entry:not(:last-child) { border-top-right-radius: 0; border-bottom-right-radius: 0; }
 .linked.vertical > button, .linked.vertical > entry { border-radius: 12px; }
-popover > contents, popover.background { border-radius: 24px; }
+popover > contents, popover.background { border-radius: 2px; }
 
 /* вкл — белая дорожка, чёрный бегунок (белый на белом пропал бы) */
 switch:checked slider { background-color: #000000; }
@@ -63,7 +63,7 @@ scrollbar slider:hover, scrollbar slider:active { background-color: #8C8C8C; }
 .thunar .rubberband { background-color: alpha(#F2F2F2, 0.08); border: 1px solid alpha(#F2F2F2, 0.4); }
 
 .thunar .sidebar, .thunar .sidebar .view { background: none; }
-.thunar .sidebar .view { padding: 8px 12px; border-radius: 999px; }
+.thunar .sidebar .view { padding: 8px 12px; border-radius: 2px; }
 .thunar .sidebar .view:hover { background-color: #1A1A1A; }
 .thunar .sidebar .view:selected { background-color: #F2F2F2; color: #000000; }
 
