@@ -91,6 +91,10 @@ Singleton {
             property var deck: ["clock", "weather", "perf", "net", "media"] // её секции по порядку, см. decks
             property var bar: ["layout", "wifi", "bluetooth", "sound", "notes", "battery", "mode", "power"] // трей бара сверху вниз, см. bars
             property bool barTitle: true   // заголовок окна столбиком в баре
+<<<<<<< HEAD
+=======
+            property string barAt: "left" // left или top; за баром едут календарь, карточка батареи, дом, остров и вспышка Glyph
+>>>>>>> 066315b (Bar: left or top only — right fought the quick-settings hot edge. Pile in its own file (a new inline component broke hot reload until qs restarted); BAR settings: edge picked on two mini screens, tray editor turns with the bar; previews draw the bar at its edge in logical px; battery % fixed width)
             // запись (quick/Rec, Sys.recArgs)
             property int recArea: 0        // 0 весь монитор, 1 область (slurp)
             property int recAudio: 0       // 0 без звука, 1 система, 2 микрофон, 3 оба одной дорожкой

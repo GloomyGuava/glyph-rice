@@ -9,9 +9,15 @@ import qs
 import qs.components
 import qs.settings
 
+<<<<<<< HEAD
 // бар: вертикальная пилюля у левого края. Сверху знак (кольцо из 16 точек) — лаунчер, центр краснеет, пока запись или микрофон.
 // Воркспейсы точками, заголовок окна столбиком, часы Doto по центру, трей снизу — клик открывает быстрые настройки.
 // Что в трее и в каком порядке, есть ли заголовок — Theme.state (настройки, раздел BAR)
+=======
+// бар: пилюля у левого края или сверху — Theme.state.barAt. Первым знак (кольцо из 16 точек) — лаунчер, центр краснеет,
+// пока запись или микрофон. Воркспейсы точками, заголовок окна, часы Doto по центру, трей последним — клик открывает быстрые настройки.
+// Сбоку всё столбиком, сверху — строкой. Что в трее и в каком порядке, есть ли заголовок — Theme.state (настройки, раздел BAR)
+>>>>>>> 066315b (Bar: left or top only — right fought the quick-settings hot edge. Pile in its own file (a new inline component broke hot reload until qs restarted); BAR settings: edge picked on two mini screens, tray editor turns with the bar; previews draw the bar at its edge in logical px; battery % fixed width)
 PanelWindow {
     id: root
 
@@ -20,8 +26,15 @@ PanelWindow {
     signal powerClicked
     signal clockClicked
 
+<<<<<<< HEAD
     anchors { left: true; top: true; bottom: true }
     implicitWidth: Math.ceil(78 * Theme.s)
+=======
+    readonly property bool vert: Theme.state.barAt !== "top" // всё, кроме top (и неизвестное), — слева
+    anchors { left: true; right: !vert; top: true; bottom: vert }
+    implicitWidth: Math.ceil(78 * Theme.s)  // сбоку
+    implicitHeight: Math.ceil(78 * Theme.s) // сверху
+>>>>>>> 066315b (Bar: left or top only — right fought the quick-settings hot edge. Pile in its own file (a new inline component broke hot reload until qs restarted); BAR settings: edge picked on two mini screens, tray editor turns with the bar; previews draw the bar at its edge in logical px; battery % fixed width)
     color: "transparent"
     WlrLayershell.namespace: "glyph-bar"
 
@@ -40,7 +53,11 @@ PanelWindow {
     Stage {
         Rectangle {
             id: pill
+<<<<<<< HEAD
             x: 14
+=======
+            x: 14 // от краёв экрана
+>>>>>>> 066315b (Bar: left or top only — right fought the quick-settings hot edge. Pile in its own file (a new inline component broke hot reload until qs restarted); BAR settings: edge picked on two mini screens, tray editor turns with the bar; previews draw the bar at its edge in logical px; battery % fixed width)
             y: 14
             width: 64
             height: parent.height - 28
@@ -161,7 +178,10 @@ PanelWindow {
             }
         }
     }
+<<<<<<< HEAD
 
+=======
+>>>>>>> 066315b (Bar: left or top only — right fought the quick-settings hot edge. Pile in its own file (a new inline component broke hot reload until qs restarted); BAR settings: edge picked on two mini screens, tray editor turns with the bar; previews draw the bar at its edge in logical px; battery % fixed width)
     readonly property var parts: ({ layout: layoutC, wifi: wifiC, bluetooth: btC, sound: soundC, notes: notesC, battery: batC, mode: modeC, power: powerC })
     Component { id: layoutC; Lb { text: Sys.layout; px: 10 } }
     Component {
@@ -192,7 +212,11 @@ PanelWindow {
             color: Notes.list.length ? Theme.fg : Theme.grey
         }
     }
+<<<<<<< HEAD
     // в вертикальном баре батарея стоит, заряд растёт снизу. На зарядке — молния сверху, заливка дышит, пока заряжается
+=======
+    // слева батарея стоит, заряд растёт снизу; сверху — лежит, растёт слева. На зарядке — молния первой, заливка дышит, пока заряжается
+>>>>>>> 066315b (Bar: left or top only — right fought the quick-settings hot edge. Pile in its own file (a new inline component broke hot reload until qs restarted); BAR settings: edge picked on two mini screens, tray editor turns with the bar; previews draw the bar at its edge in logical px; battery % fixed width)
     Component {
         id: batC
         Column {
@@ -224,7 +248,13 @@ PanelWindow {
                     opacity: batc.pulse
                 }
             }
+<<<<<<< HEAD
             Lb { anchors.horizontalCenter: parent.horizontalCenter; text: Math.round(root.bat.percentage * 100); px: 10 }
+=======
+            // ширина — под «100»: сверху трей прижат вправо, 99 → 100 сдвигал бы всё левее
+            Lb { width: full.implicitWidth; horizontalAlignment: Text.AlignHCenter; text: Math.round(root.bat.percentage * 100); px: 10 }
+            Lb { id: full; visible: false; text: "100"; px: 10 }
+>>>>>>> 066315b (Bar: left or top only — right fought the quick-settings hot edge. Pile in its own file (a new inline component broke hot reload until qs restarted); BAR settings: edge picked on two mini screens, tray editor turns with the bar; previews draw the bar at its edge in logical px; battery % fixed width)
         }
     }
     // режим питания засечками (Rules.modes): ultra — одна, performance — все; клик — следующий,
@@ -292,9 +322,15 @@ PanelWindow {
         visible: t > 0
         // от правого края пилюли бара с зазором 14; низом — по popY, растёт вверх
         anchor.item: pill
+<<<<<<< HEAD
         anchor.rect: Qt.rect(pill.width + 14, root.popY, 1, 1)
         anchor.edges: Edges.Top | Edges.Left
         anchor.gravity: Edges.Top | Edges.Right
+=======
+        anchor.rect: root.vert ? Qt.rect(pill.width + 14, root.popAt.y, 1, 1) : Qt.rect(root.popAt.x, pill.height + 14, 1, 1)
+        anchor.edges: Edges.Top | Edges.Left
+        anchor.gravity: root.vert ? Edges.Top | Edges.Right : Edges.Bottom | Edges.Left
+>>>>>>> 066315b (Bar: left or top only — right fought the quick-settings hot edge. Pile in its own file (a new inline component broke hot reload until qs restarted); BAR settings: edge picked on two mini screens, tray editor turns with the bar; previews draw the bar at its edge in logical px; battery % fixed width)
         implicitWidth: Math.ceil(440 * Theme.s)
         implicitHeight: Math.ceil(card.height * Theme.s)
         color: "transparent"
@@ -308,7 +344,11 @@ PanelWindow {
                 color: Theme.s1
                 border { width: 1; color: Theme.s2 }
                 opacity: pop.t
+<<<<<<< HEAD
                 transform: Translate { x: -16 * (1 - pop.t) }
+=======
+                transform: Translate { x: root.vert ? -16 * (1 - pop.t) : 0; y: root.vert ? 0 : -16 * (1 - pop.t) }
+>>>>>>> 066315b (Bar: left or top only — right fought the quick-settings hot edge. Pile in its own file (a new inline component broke hot reload until qs restarted); BAR settings: edge picked on two mini screens, tray editor turns with the bar; previews draw the bar at its edge in logical px; battery % fixed width)
                 HoverHandler { id: popHov }
 
                 Column {

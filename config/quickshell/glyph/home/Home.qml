@@ -49,6 +49,10 @@ PanelWindow {
 
     Stage {
         id: stage
+<<<<<<< HEAD
+=======
+        x: Theme.state.barAt === "top" ? -39 * Theme.s : 0 // раскладка под бар слева; бар сверху — на его полширины влево, по центру
+>>>>>>> 066315b (Bar: left or top only — right fought the quick-settings hot edge. Pile in its own file (a new inline component broke hot reload until qs restarted); BAR settings: edge picked on two mini screens, tray editor turns with the bar; previews draw the bar at its edge in logical px; battery % fixed width)
 
 	Row {
 	    visible: false

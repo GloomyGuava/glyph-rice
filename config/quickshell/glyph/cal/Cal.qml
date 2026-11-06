@@ -43,8 +43,16 @@ PanelWindow {
     Stage {
         Rectangle {
             id: panel
+<<<<<<< HEAD
             x: 92 - 24 * (1 - root.t) // правый край пилюли бара (14 + 64) и зазор 14
             anchors.verticalCenter: parent.verticalCenter
+=======
+            // внутренний край пилюли бара (14 + 64) и зазор 14, выезжает от бара; поперёк — по центру, где часы
+            readonly property real off: 92 - 24 * (1 - root.t)
+            readonly property bool onTop: Theme.state.barAt === "top"
+            x: onTop ? (parent.width - width) / 2 : off
+            y: onTop ? off : (parent.height - height) / 2
+>>>>>>> 066315b (Bar: left or top only — right fought the quick-settings hot edge. Pile in its own file (a new inline component broke hot reload until qs restarted); BAR settings: edge picked on two mini screens, tray editor turns with the bar; previews draw the bar at its edge in logical px; battery % fixed width)
             width: 440
             height: col.height + 52
             opacity: root.t
