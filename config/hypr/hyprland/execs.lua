@@ -32,8 +32,7 @@ hl.on("hyprland.start", function()
 
     -- hypridle поднимает шелл (Rules.idle): тайминги из house rules → ~/.config/demonshot/hypridle.conf
 
-    -- фоновый kitty без окна: первый Super+Q тоже открывается мгновенно
-    hl.exec_cmd(vars.terminal .. " --start-as=hidden")
+    -- фоновый kitty без окна: первый Super+Q тоже открывается мгновенно 
 end)
 
 -- Resizer listener

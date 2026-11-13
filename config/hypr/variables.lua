@@ -20,7 +20,7 @@ return {
     lockCmd                    = rice .. " lock", -- лок текущего шелла; второй не запускает
 
     -- Apps
-    terminal                   = "kitty -1", -- single-instance: новые окна из живого процесса, ~40 мс вместо ~400
+    terminal                   = "kitty", -- single-instance: новые окна из живого процесса, ~40 мс вместо ~400
     browser                    = "zen-browser",
     fileExplorer               = "thunar",
     audioSettings              = "pavucontrol",
@@ -83,7 +83,7 @@ return {
     ------------------
 
     -- Workspaces
-    kbMoveWinToWs              = "SUPER + ALT",
+    kbMoveWinToWs              = "SUPER + SHIFT",
     kbMoveWinToWsGroup         = "CTRL + SUPER + ALT",
     kbGoToWs                   = "SUPER",
     kbGoToWsGroup              = "CTRL + SUPER",
@@ -104,7 +104,7 @@ return {
     kbWindowFullscreen         = "SUPER + F",
     kbWindowBorderedFullscreen = "SUPER + ALT + F",
     kbToggleWindowFloating     = "SUPER + ALT + space",
-    kbCloseWindow              = "SUPER + C",
+    kbCloseWindow              = "SUPER + Q",
 
     -- Special workspaces toggles
     kbSpecialWs                = "SUPER + S",
@@ -114,15 +114,15 @@ return {
     kbTodoWs                   = "SUPER + R",
 
     -- Apps
-    kbTerminal                 = "SUPER + Q",
-    kbBrowser                  = "SUPER + W",
+    kbTerminal                 = "SUPER + RETURN",
+    kbBrowser                  = "SUPER + B",
     kbEditor                   = "SUPER + SHIFT + K",
     kbFileExplorer             = "SUPER + E",
 
     -- Misc
     kbSession                  = "CTRL + ALT + Delete",
     kbPower                    = "SUPER + Escape",
-    kbAltar                    = "SUPER + Space",
+    kbAltar                    = "SUPER + SHIFT + A",
     kbLock                     = "SUPER + L",
     kbRestoreLock              = "SUPER + ALT + L",
 }

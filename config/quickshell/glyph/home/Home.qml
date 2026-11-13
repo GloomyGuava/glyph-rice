@@ -50,20 +50,23 @@ PanelWindow {
         id: stage
         x: Theme.state.barAt === "top" ? -39 * Theme.s : 0 // раскладка под бар слева; бар сверху — на его полширины влево, по центру
 
-        Row {
+	Row {
+	    visible: false
             x: 182
             y: 150
             Num { text: Theme.hh(clock.date); font.pixelSize: 300 }
             Num { text: ":"; font.pixelSize: 300; opacity: Theme.state.blink && root.dim ? 0.2 : 1 }
             Num { text: Qt.formatTime(clock.date, "mm"); font.pixelSize: 300 }
         }
-        Lb {
+	Lb {
+	    visible: false
             x: 190
             y: 448
             text: `${root.en.toString(clock.date, "dddd · d MMMM")} · week ${root.week(clock.date)}`
             px: 14
         }
-        Text {
+	Text {
+	    visible: false
             x: 188
             y: 560
             textFormat: Text.StyledText
@@ -72,7 +75,8 @@ PanelWindow {
             lineHeight: 1.1
             color: Theme.fg
         }
-        Row {
+	Row {
+	    visible: false
             x: 190
             y: 700
             spacing: 28

@@ -38,9 +38,12 @@ if status is-interactive
     abbr la 'ls -a'
     abbr lla 'ls -la'
 
+    abbr v 'nvim'
+    abbr ff 'fastfetch'
+    abbr fetch 'fetch/./fetch'
 
     # For jumping between prompts in foot terminal
-    function mark_prompt_start --on-event fish_prompt
+     function mark_prompt_start --on-event fish_prompt
         echo -en "\e]133;A\e\\"
-    end
+     end
 end
