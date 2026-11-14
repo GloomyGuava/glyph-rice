@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Bluetooth
 import Quickshell.Hyprland
@@ -8,8 +9,8 @@ import qs
 import qs.components
 import qs.services
 
-// «домашний экран» на слое bottom, прозрачный: часы Doto, приветствие и бенто виджетов. Сетка, шар и обои — под ним, в Back.
-// Окно открылось — всё уходит под него само. Опрос системы и анимации — только пока воркспейс пуст
+// the «home screen» on the bottom layer, transparent: a Doto clock, the greeting and a bento of widgets. The grid, orb and wallpaper — under it, in Back.
+// A window opened — everything goes under it by itself. System polling and animations — only while the workspace is empty
 PanelWindow {
     id: root
 
@@ -19,32 +20,28 @@ PanelWindow {
     WlrLayershell.layer: WlrLayer.Bottom
     WlrLayershell.namespace: "glyph-home"
 
-    // дом виден, когда пуст воркспейс своего экрана, а не того, где фокус: работаешь на втором — дом первого живой
-    function idle(s) { return (Hyprland.monitorFor(s)?.activeWorkspace?.toplevels.values.length ?? 0) === 0; }
-    readonly property bool home: visible && idle(screen)
-    // значения — общие для всех домов (по экранам, где дом есть и виден): иначе Binding'и соседних домов перетирали бы друг
-    // друга. Не в делегате: уничтоженный Binding значение не возвращает — убрал виджет, а cava работала бы вечно.
-    // ponytail: cava — если стоит в списке, даже не влезшей в 3 × 3
-    readonly property var homes: Quickshell.screens.filter(s => Theme.scr(s.name, "home") && idle(s))
-    Binding { target: SysStats; property: "detailed"; value: root.homes.length > 0 || Sys.deckOpen }
-    Binding { target: Cava; property: "active"; value: root.homes.some(s => Theme.scr(s.name, "widgets").includes("cava")) }
+    readonly property bool home: (Hyprland.focusedWorkspace?.toplevels.values.length ?? 0) === 0
+    Binding { target: SysStats; property: "detailed"; value: root.home || Sys.deckOpen }
+    // not in the delegate: a destroyed Binding doesn't restore the value — the widget removed, and cava would run forever
+    Binding { target: Cava; property: "active"; value: root.home && !Theme.state.lite && Theme.state.homeBento && bento.model.some(w => w.id === "cava") }
+
 
     SystemClock { id: clock; precision: SystemClock.Minutes }
     readonly property var en: Qt.locale("en_US")
 
-    // мигающее двоеточие — два кадра в секунду, а не анимация на каждый vsync
+    // the blinking colon — two frames a second, not an animation on every vsync
     property bool dim: false
     Timer { running: root.home && Theme.state.blink; interval: 500; repeat: true; onTriggered: root.dim = !root.dim }
 
     readonly property var player: Media.player
     readonly property var buds: Bluetooth.devices.values.find(d => d.connected && d.batteryAvailable) ?? null
-    property var hist: [] // cpu за минуту: 34 столбца матрицы
+    property var hist: [] // cpu over a minute: 34 matrix columns
     Connections {
         target: SysStats
         function onCpuChanged() { root.hist = root.hist.concat([SysStats.cpu]).slice(-34); }
     }
 
-    function week(d) { // ISO-неделя
+    function week(d) { // ISO week
         const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
         t.setUTCDate(t.getUTCDate() + 4 - (t.getUTCDay() || 7));
         return Math.ceil(((t - Date.UTC(t.getUTCFullYear(), 0, 1)) / 86400000 + 1) / 7);
@@ -53,48 +50,54 @@ PanelWindow {
 
     Stage {
         id: stage
-        // раскладка под бар слева; бар сверху или снят с экрана — на его полширины влево, по центру
-        x: Theme.state.barAt === "top" || !Theme.scr(root.screen?.name, "bar") ? -39 * Theme.s : 0
+        x: Theme.state.barAt === "top" ? -39 * Theme.s : 0 // the layout is for a bar on the left; a bar on top — half its width to the left, centered
 
-	Row {
-	    visible: false
-            x: 182
-            y: 150
-            Num { text: Theme.hh(clock.date); font.pixelSize: 300 }
-            Num { text: ":"; font.pixelSize: 300; opacity: Theme.state.blink && root.dim ? 0.2 : 1 }
-            Num { text: Qt.formatTime(clock.date, "mm"); font.pixelSize: 300 }
+        // the clock and date, the greeting and its line can each be hidden (prefs → LOOK → on home); they fade. From Isaqdn03/glyph-rice
+        Item {
+            opacity: Theme.state.homeClock ? 1 : 0
+            visible: opacity > 0
+            Behavior on opacity { NumberAnimation { duration: Theme.t; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.glide } }
+            Row {
+                x: 182
+                y: 150
+                Num { text: Theme.hh(clock.date); font.pixelSize: 300 }
+                Num { text: ":"; font.pixelSize: 300; opacity: Theme.state.blink && root.dim ? 0.2 : 1 }
+                Num { text: Qt.formatTime(clock.date, "mm"); font.pixelSize: 300 }
+            }
+            Lb {
+                x: 190
+                y: 448
+                text: `${root.en.toString(clock.date, "dddd · d MMMM")} · week ${root.week(clock.date)}`
+                px: 14
+                color: Theme.state.wall ? Theme.fg : Theme.grey
+            }
         }
-	Lb {
-	    visible: false
-            x: 190
-            y: 448
-            text: `${root.en.toString(clock.date, "dddd · d MMMM")} · week ${root.week(clock.date)}`
-            px: 14
-        }
-	Text {
-	    visible: false
-            x: 188
-            y: 560
-            textFormat: Text.StyledText
-            text: `${root.hello},<br><font color="${Theme.grey}">${(Theme.state.name || Quickshell.env("USER")).replace(/&/g, "&amp;").replace(/</g, "&lt;")}.</font>`
-            font { family: Theme.ui; pixelSize: 54; weight: Font.Light; letterSpacing: -1 }
-            lineHeight: 1.1
-            color: Theme.fg
-        }
-	Row {
-	    visible: false
-            x: 190
-            y: 700
-            spacing: 28
-            Meta { icon: "\u{F009A}"; text: `${Notes.list.length} notifications` }
-            Meta { visible: Weather.ok; icon: Weather.glyph(Weather.now?.code ?? 0, Weather.now?.day); text: `${Math.round(Weather.now?.temp ?? 0)}° ${Weather.name(Weather.now?.code)}` }
-            Meta { visible: !!root.buds; icon: "\u{F02CB}"; text: `${root.buds?.name ?? ""} · ${Math.round((root.buds?.battery ?? 0) * 100)}%` }
+        Item {
+            opacity: Theme.state.homeHello ? 1 : 0
+            visible: opacity > 0
+            Behavior on opacity { NumberAnimation { duration: Theme.t; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.glide } }
+            Text {
+                x: 188
+                y: 560
+                textFormat: Text.StyledText
+                text: `${root.hello},<br><font color="${Theme.grey}">${Theme.state.name || Quickshell.env("USER")}.</font>`
+                font { family: Theme.ui; pixelSize: 54; weight: Font.Light; letterSpacing: -1 }
+                lineHeight: 1.1
+                color: Theme.fg
+            }
+            Row {
+                x: 190
+                y: 700
+                spacing: 28
+                Meta { icon: "\u{F009A}"; text: `${Notes.list.length} notifications` }
+                Meta { visible: Weather.ok; icon: Weather.glyph(Weather.now?.code ?? 0, Weather.now?.day); text: `${Math.round(Weather.now?.temp ?? 0)}° ${Weather.name(Weather.now?.code)}` }
+                Meta { visible: !!root.buds; icon: "\u{F02CB}"; text: `${root.buds?.name ?? ""} · ${Math.round((root.buds?.battery ?? 0) * 100)}%` }
+            }
         }
 
-        // бенто: ячейки 220, зазор 20, сетка 3×3, правый край — в 80 от края экрана (на 1920 — с 1140, на широком — правее).
-        // Какие виджеты и в каком порядке — Theme.state.widgets (настройки; у экрана могут быть свои), ширины — Theme.kinds.
-        // Кладём слева направо: не влез в ряд — со следующего, в три ряда не влез — не показывается.
-        // Квадрат со скруглением 40 или круг — других форм нет
+        // bento: 220 cells, a 20 gap, a 3×3 grid. Which widgets and in what order — Theme.state.widgets (settings), widths —
+        // Theme.kinds. Laid out left to right: doesn't fit in a row — from the next one, doesn't fit in three rows — not shown.
+        // A square with 40 rounding or a circle — no other shapes
         Repeater {
             id: bento
             model: {
@@ -105,21 +108,28 @@ PanelWindow {
                     if (!w) continue;
                     if (c + w > 3) { r++; c = 0; }
                     if (r > 2) break;
-                    out.push({ id, x: c * 240, y: 150 + r * 240 });
+                    // bar on the right — the grid moves left by the bar's width, otherwise the right column would go under it
+                    out.push({ id, x: (Theme.barRight ? 1060 : 1140) + c * 240, y: 150 + r * 240 });
                     c += w;
                 }
                 return out;
             }
             Loader {
+                // hidden (prefs → LOOK → on home) — fades, then unloads
+                opacity: Theme.state.homeBento ? 1 : 0
+                visible: opacity > 0
+                active: visible
+                Behavior on opacity { NumberAnimation { duration: Theme.t; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.glide } }
                 required property var modelData
                 x: stage.width - 780 + modelData.x
                 y: modelData.y
                 sourceComponent: ({ weather: weatherW, calendar: calendarW, cpu: cpuW, ram: ramW, gpu: gpuW, disk: diskW,
-                                    battery: batteryW, buds: budsW, player: playerW, system: systemW, cat: catW, cava: cavaW })[modelData.id] ?? null
+                                    battery: batteryW, buds: budsW, player: playerW, system: systemW, cat: catW, cava: cavaW,
+                                    photo: photoW })[modelData.id] ?? null
             }
         }
 
-        // погода
+        // weather
         Component {
             id: weatherW
             W {
@@ -137,7 +147,7 @@ PanelWindow {
                     Lb {
                         anchors.horizontalCenter: parent.horizontalCenter
                         topPadding: 8
-                        width: Math.min(implicitWidth, 160) // хорда круга на этой высоте
+                        width: Math.min(implicitWidth, 160) // the circle's chord at this height
                         elide: Text.ElideRight
                         text: Weather.ok ? `${Weather.name(Weather.now.code)} · ${Math.round(Weather.days[0]?.min)}°/${Math.round(Weather.days[0]?.max)}°` : "no sky"
                     }
@@ -145,7 +155,7 @@ PanelWindow {
             }
         }
 
-        // календарь
+        // calendar
         Component {
             id: calendarW
             W {
@@ -177,7 +187,7 @@ PanelWindow {
             }
         }
 
-        // кольца: cpu, память, видеокарта, диск, батарея
+        // rings: cpu, memory, gpu, disk, battery
         Component { id: cpuW; RingW { f: SysStats.cpu; value: Math.round(SysStats.cpu * 100); label: "cpu %" } }
         Component { id: ramW; RingW { f: SysStats.mem; value: Math.round(SysStats.mem * 100); label: "ram %" } }
         Component { id: gpuW; RingW { f: SysStats.gpu; value: Math.round(SysStats.gpu * 100); label: `gpu · ${Math.round(SysStats.gpuTemp)}°` } }
@@ -193,7 +203,7 @@ PanelWindow {
             }
         }
 
-        // плеер: обложка точками крутится, пока играет
+        // player: the dot cover spins while playing
         Component {
             id: playerW
             W {
@@ -205,7 +215,7 @@ PanelWindow {
                     width: 164
                     height: 164
                     property real turn: 0
-                    Timer { running: root.home && Media.playing; interval: 33; repeat: true; onTriggered: art.turn = (art.turn + 360 / 14 / 30) % 360 }
+                    Timer { running: root.home && Media.playing && !Theme.state.lite; interval: 33; repeat: true; onTriggered: art.turn = (art.turn + 360 / 14 / 30) % 360 }
                     Art { anchors.fill: parent; rotation: art.turn; url: root.player?.trackArtUrl ?? ""; step: 6 }
                 }
                 Column {
@@ -229,19 +239,19 @@ PanelWindow {
                         color: Theme.grey
                     }
                     Item { width: 1; height: 18 }
-                    Seg { width: parent.width; height: 6; n: 24; f: root.player?.lengthSupported && root.player.length > 0 ? Media.position / root.player.length : 0 } // firefox длину не шлёт
+                    Seg { width: parent.width; height: 6; n: 24; f: root.player?.lengthSupported && root.player.length > 0 ? Media.position / root.player.length : 0 } // firefox doesn't send the length
                     Item { width: 1; height: 16 }
                     Controls { size: 22; play: 52 }
                 }
             }
         }
 
-        // наушники кольцом; нет их — громкость
+        // earbuds as a ring; none — the volume
         Component {
             id: budsW
             W {
                 round: true
-                Notch { onNotch: d => Sys.setVol(Sys.vol + d * 0.05) } // колесо — громкость, и при наушниках: их заряд колесом не крутят
+                Notch { onNotch: d => Sys.setVol(Sys.vol + d * 0.05) } // the wheel is the volume, with buds too: no wheel turns their charge
                 Ring { anchors { fill: parent; margins: 12 } f: root.buds ? root.buds.battery : Sys.vol }
                 Column {
                     anchors.centerIn: parent
@@ -259,18 +269,59 @@ PanelWindow {
             }
         }
 
-        // кот: гифка матрицей в тон темы через шейдер обоев (как Wall в look 0), какая — services/Gifs, сама плитка — Gif.
-        // Танцует, только пока дом виден
+        // the cat: a gif as a matrix in the theme's tone via the wallpaper shader (like Wall in look 0), which one — services/Gifs, the tile itself — Gif.
+        // Dances only while home is visible
         Component {
             id: catW
             W {
                 id: cw
-                Gif { anchors.fill: parent; playing: root.home; bg: cw.color }
+                Gif { anchors.fill: parent; playing: root.home && !Theme.state.lite; bg: cw.color }
             }
         }
 
-        // cava матрицей в круге, как Glyph Matrix на спинке Nothing Phone (3): бас в центре, к краям верхи, столбики растут
-        // от середины вверх и вниз. Тишина — погасшие точки. cava работает, только пока дом виден
+        // photo: up to five shots from a folder (services/Photos), like Nothing's photo widget. They change with a wave of dots via the same Wall as
+        // the wallpaper, hence its own look (dots / color dots / color). Circle or square — a mask in the tile's shape. Pages through only
+        // while home is visible; an empty folder — a hint where to put them
+        Component {
+            id: photoW
+            W {
+                id: pw
+                round: Theme.state.photoRound
+                property int at: 0
+                readonly property var list: Photos.list
+                onListChanged: at = 0
+                Component.onCompleted: { Photos.active = true; Photos.refresh(); }
+                Component.onDestruction: Photos.active = false
+                Connections { target: root; function onHomeChanged() { if (root.home) Photos.refresh(); } }
+                Timer {
+                    running: root.home && pw.list.length > 1
+                    interval: Math.max(3, Theme.state.photoSecs) * 1000
+                    repeat: true
+                    onTriggered: pw.at = (pw.at + 1) % pw.list.length
+                }
+                Rectangle { id: shape; anchors.fill: parent; radius: pw.radius; visible: false; layer.enabled: true }
+                Wall {
+                    anchors { fill: parent; margins: 1 } // the tile's border stays visible
+                    path: pw.list[pw.at] ?? ""
+                    look: Theme.state.photoLook
+                    pitch: 5
+                    bright: 1
+                    glass: false
+                    layer.enabled: true
+                    layer.effect: MultiEffect { maskEnabled: true; maskSource: shape }
+                }
+                Column {
+                    visible: !pw.list.length
+                    anchors.centerIn: parent
+                    spacing: 10
+                    Icon { anchors.horizontalCenter: parent.horizontalCenter; text: "\u{F02E9}"; font.pixelSize: 40; color: Theme.mute }
+                    Lb { anchors.horizontalCenter: parent.horizontalCenter; width: Math.min(implicitWidth, 170); elide: Text.ElideMiddle; text: Photos.dir.replace(Quickshell.env("HOME"), "~"); px: 10 }
+                }
+            }
+        }
+
+        // cava as a matrix in a circle, like the Glyph Matrix on the back of the Nothing Phone (3): bass in the center, highs toward the edges, the bars grow
+        // from the middle up and down. Silence — dimmed dots. cava runs only while home is visible
         Component {
             id: cavaW
             W {
@@ -285,12 +336,12 @@ PanelWindow {
                             required property int index
                             readonly property int cx: index % 15 - 7
                             readonly property int cy: Math.floor(index / 15) - 7
-                            readonly property int half: Math.floor(Math.sqrt(7.5 * 7.5 - cx * cx)) // полвысоты столбца внутри круга
+                            readonly property int half: Math.floor(Math.sqrt(7.5 * 7.5 - cx * cx)) // half the column height inside the circle
                             readonly property real v: Cava.bars[Math.abs(cx)] ?? 0
                             width: 8
                             height: 8
                             radius: 4
-                            // вне круга — прозрачная, не visible: Grid сдвинул бы остальные
+                            // outside the circle — transparent, not visible: Grid would shift the rest
                             color: Math.abs(cy) > half ? "transparent" : Math.abs(cy) < v * (half + 1) ? Theme.fg : Theme.s3
                         }
                     }
@@ -298,7 +349,7 @@ PanelWindow {
             }
         }
 
-        // система: цифры и график cpu матрицей
+        // system: numbers and a cpu graph as a matrix
         Component {
             id: systemW
             W {
@@ -320,7 +371,7 @@ PanelWindow {
                     width: parent.width - x - 34
                     spacing: 12
                     Lb { text: "cpu · 60 s" }
-                    // верхняя точка столбца белая, под ней серые
+                    // the top dot of a column is white, greys under it
                     Grid {
                         id: spark
                         width: parent.width
@@ -332,7 +383,7 @@ PanelWindow {
                             Rectangle {
                                 required property int index
                                 readonly property int x_: index % 34
-                                readonly property int up: 8 - Math.floor(index / 34) // 8 сверху … 1 снизу
+                                readonly property int up: 8 - Math.floor(index / 34) // 8 at the top … 1 at the bottom
                                 readonly property int h: Math.round(1 + 6 * (root.hist[x_ - 34 + root.hist.length] ?? 0))
                                 width: spark.d
                                 height: spark.d
@@ -355,7 +406,7 @@ PanelWindow {
         color: Theme.s1
         border { width: 1; color: Theme.s2 }
     }
-    // круглый виджет: кольцо из точек горит долей f, в центре число и подпись
+    // a round widget: a ring of dots lit by a fraction f, a number and a label in the center
     component RingW: Rectangle {
         id: rw
         property real f
@@ -379,7 +430,8 @@ PanelWindow {
         property string text
         spacing: 10
         Icon { anchors.verticalCenter: parent.verticalCenter; text: parent.icon; font.pixelSize: 16 }
-        Lb { anchors.verticalCenter: parent.verticalCenter; text: parent.text }
+        // on a wallpaper grey gets lost
+        Lb { anchors.verticalCenter: parent.verticalCenter; text: parent.text; color: Theme.state.wall ? Theme.fg : Theme.grey }
     }
     component Stat: Column {
         property string label
