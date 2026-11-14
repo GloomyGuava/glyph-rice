@@ -76,7 +76,7 @@ Singleton {
             property int repeatDelay: 250
             property int repeatRate: 35
             property bool natural: true
-            property bool tap: true
+	    property bool tap: true
             property bool typingOff: false
             property int scroll: 30       // % — scroll_factor 0.3
             property int sens: 0          // -100…100 → sensitivity -1…1
@@ -114,7 +114,8 @@ Singleton {
     function setNewSide(x) {
         store.newSide = x;
         monitor();
-    }
+}
+    property bool driving: false
     property bool monWanted: false // monitor() was called before the hyprctl answer arrived
     Process {
         id: monProc
@@ -255,6 +256,8 @@ Singleton {
     readonly property int refreshHz: rates.reduce((a, b) => Math.abs(b - store.refresh) < Math.abs(a - store.refresh) ? b : a)
     readonly property real scale: store.monScale || mon.scale || 1 // what's actually set, at auto too
     readonly property var scales: ["auto", "1", "1.25", "1.5", "2"]
+    readonly property int scaleIdx: store.monScale ? scales.indexOf(String(store.monScale)) : 0
+function setScale(i) { store.monScale = i ? +scales[i] : 0; monitor(); }
     function windows() {
         const s = store;
         hypr(`hl.config({ general = { gaps_in = ${s.gapsIn}, gaps_out = ${s.gapsOut}, border_size = ${s.border} }, `
