@@ -31,8 +31,6 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("mpris-proxy")
 
     -- hypridle поднимает шелл (Rules.idle): тайминги из house rules → ~/.config/demonshot/hypridle.conf
-
-    -- фоновый kitty без окна: первый Super+Q тоже открывается мгновенно 
 end)
 
 -- Resizer listener
