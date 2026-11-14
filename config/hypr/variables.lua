@@ -84,7 +84,7 @@ return {
     ------------------
 
     -- Workspaces
-    kbMoveWinToWs              = "SUPER + ALT",
+    kbMoveWinToWs              = "SUPER + SHIFT",
     kbMoveWinToWsGroup         = "CTRL + SUPER + ALT",
     kbGoToWs                   = "SUPER",
     kbGoToWsGroup              = "CTRL + SUPER",
@@ -114,15 +114,15 @@ return {
     kbTodoWs                   = "SUPER + R",
 
     -- Apps
-    kbTerminal                 = "SUPER + T",
-    kbBrowser                  = "SUPER + W",
-    kbEditor                   = "SUPER + SHIFT + K",
+    kbTerminal                 = "SUPER + RETURN",
+    kbBrowser                  = "SUPER + B",
+    kbEditor                   = "SUPER + N",
     kbFileExplorer             = "SUPER + E",
 
     -- Misc
     kbSession                  = "CTRL + ALT + Delete",
     kbPower                    = "SUPER + Escape",
-    kbAltar                    = "SUPER + Space",
-    kbLock                     = "SUPER + L",
+    kbAltar                    = "SUPER + SHIFT + A",
+    kbLock                     = "SUPER + CTRL + L",
     kbRestoreLock              = "SUPER + ALT + L",
 }

@@ -4,7 +4,7 @@ local fn   = require("hyprland.functions")
 -- shell globals — shell:<name>: registered by whichever shell is alive (demonshot, glyph); what it doesn't have stays silent
 -- Launcher: tapping Super opens it on release. Without interrupts Super+1 would open the launcher too,
 -- so every Super+<key> sends launcherInterrupt without consuming (bindin catchall is broken since 0.55)
-hl.bind("SUPER + SUPER_L", hl.dsp.global("shell:launcher"), { release = true })
+hl.bind("SUPER + SPACE", hl.dsp.global("shell:launcher"))
 -- after Super+<key> the release bind above doesn't fire and the interrupt sticks — reset it on Super press
 hl.bind("SUPER_L", hl.dsp.global("shell:launcherArm"), { ignore_mods = true, non_consuming = true })
 for _, key in ipairs({
@@ -31,7 +31,7 @@ hl.bind("SUPER + Tab", hl.dsp.global("shell:overview")) -- workspace overview
 hl.bind("SUPER + N", hl.dsp.global("shell:ward"))
 hl.bind("SUPER + P", hl.dsp.global("shell:pact"))
 hl.bind("SUPER + A", hl.dsp.global("shell:quick")) -- glyph quick settings
-hl.bind("SUPER + SHIFT + W", hl.dsp.global("shell:wall")) -- glyph wallpapers
+hl.bind("SUPER + W", hl.dsp.global("shell:wall")) -- glyph wallpapers
 hl.bind(vars.kbSession, hl.dsp.global("shell:power"))
 hl.bind(vars.kbPower, hl.dsp.global("shell:power"))
 hl.bind(vars.kbLock, hl.dsp.exec_cmd(vars.lockCmd))
