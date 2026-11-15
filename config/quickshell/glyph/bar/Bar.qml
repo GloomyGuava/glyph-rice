@@ -12,6 +12,7 @@ import qs.components
 import qs.services
 import qs.settings
 
+
 // bar: a pill at the left or right edge, or along the top — Theme.state.barAt. First the mark (a ring of 16 dots) — the launcher, the center
 // turns red while recording or the microphone is on. Workspaces as dots, the window title, a Doto clock in the center, the tray last — a click
 // opens quick settings. At the side everything is a column, on top a row. What's in the tray and in what order, whether there's a title —
@@ -27,8 +28,8 @@ PanelWindow {
     readonly property bool right_: Theme.barRight
     readonly property bool vert: Theme.state.barAt !== "top" // anything but top is at the side
     anchors { left: !right_; right: right_ || !vert; top: true; bottom: vert }
-    implicitWidth: Theme.barPx   // at the side
-    implicitHeight: Theme.barPx  // on top
+    implicitWidth: Theme.barPx + (vert ? Theme.barFillet : 0)
+    implicitHeight: Theme.barPx + (vert ? 0 : Theme.barFillet)
     // auto-hide, experimental, for OLEDs (burn-in): Theme.state.barHide lists the screens. Hidden: no exclusive zone, input only on a 2 px strip at the
     // edge. Rest there and the pill slides in over the windows; leave it and it slides back out. From Isaqdn03/glyph-rice
     readonly property bool autoHide: vert && Theme.state.barHide.includes(screen?.name ?? "")
@@ -36,13 +37,19 @@ PanelWindow {
     readonly property bool shown: !autoHide || hov || powOpen || pop.visible
     property real slide: shown ? 1 : 0
     Behavior on slide { NumberAnimation { duration: Theme.t; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.glide } }
-    exclusionMode: autoHide ? ExclusionMode.Ignore : ExclusionMode.Auto
+    exclusionMode: autoHide ? ExclusionMode.Ignore : (Theme.barFillet > 0 ? ExclusionMode.Normal : ExclusionMode.Auto)
+    exclusiveZone: Theme.barPx 
     mask: Region { item: root.shown ? hitAll : hitEdge }
     onAutoHideChanged: hov = false
     Timer { id: showT; interval: 150; onTriggered: root.hov = true }
     Timer { id: hideT; interval: 500; onTriggered: root.hov = false }
     Item { id: hitEdge; x: root.right_ ? root.width - 2 : 0; width: 2; height: parent.height }
-    Item { id: hitAll; anchors.fill: parent }
+    Item {
+       id: hitAll
+       x: root.right_ ? parent.width - width : 0
+       width: root.vert ? Theme.barPx : parent.width
+       height: root.vert ? parent.height : Theme.barPx
+    }
     color: "transparent"
     WlrLayershell.namespace: "glyph-bar"
 
@@ -57,6 +64,30 @@ PanelWindow {
 
     // hyprland 0.56 with lua: dispatch takes a lua expression
     function go(ws) { Hyprland.dispatch(`hl.dsp.focus({ workspace = "${ws}" })`); }
+    
+    component Fillet: Shape {
+    id: f
+    property real r: 0
+    property bool flipX: false
+    property bool flipY: false
+    width: r
+    height: r
+    preferredRendererType: Shape.CurveRenderer
+    transform: Scale {
+        origin.x: f.width / 2
+        origin.y: f.height / 2
+        xScale: f.flipX ? -1 : 1
+        yScale: f.flipY ? -1 : 1
+    }
+    ShapePath {
+        fillColor: Theme.s1
+        strokeColor: "transparent"
+        startX: 0; startY: 0
+        PathLine { x: f.r; y: 0 }
+        PathArc { x: 0; y: f.r; radiusX: f.r; radiusY: f.r; direction: PathArc.Counterclockwise }
+        PathLine { x: 0; y: 0 }
+    }
+}
 
     // workspace scroll: hover the dots and turn the wheel to move through them. One wheel notch = one workspace;
     // the delta accumulates and resets after 300 ms without events, so touchpads and hi-res wheels (many small
@@ -80,27 +111,49 @@ PanelWindow {
 
     SystemClock { id: clock; precision: SystemClock.Minutes }
 
+  
     Stage {
         HoverHandler {
             onHoveredChanged: {
                 if (hovered) { hideT.stop(); showT.restart(); }
                 else { showT.stop(); hideT.restart(); }
             }
-        }
+    }
+        Fillet {
+    visible: pill.fr > 0 && root.slide > 0
+    opacity: root.slide
+    r: pill.fr
+    flipX: root.vert && root.right_
+    x: root.vert ? (root.right_ ? 0 : 64 * pill.k) : 0
+    y: root.vert ? 0 : 64 * pill.k
+}
+Fillet {
+    visible: pill.fr > 0 && root.slide > 0
+    opacity: root.slide
+    r: pill.fr
+    flipX: root.vert ? root.right_ : true
+    flipY: root.vert
+    x: root.vert ? (root.right_ ? 0 : 64 * pill.k) : parent.width - pill.fr
+    y: root.vert ? parent.height - pill.fr : 64 * pill.k
+}
         Rectangle {
- 	    id: pill
-            readonly property real k: Theme.state.barSize / 100
+	    id: pill
+	    readonly property real k: Theme.state.barSize / 100
+            readonly property bool flush: Theme.state.barStick
+            readonly property real eg: flush ? 0 : 14   // gap on the screen-edge side
+	    readonly property real lg: flush ? 0 : 14   // gap along the edge
+	    readonly property real fr: flush ? rad * k : 0   // fillet radius, design units
+            readonly property real rad: Theme.corner(32)
             scale: k
-            transformOrigin: Item.TopLeft
-            // a 14 gap — on the screen-edge side; auto-hide slides it off that edge
-            x: (root.right_ ? 0 : 14 * k) + (root.vert ? (root.right_ ? 80 : -80) * k * (1 - root.slide) : 0)
-            visible: root.slide > 0
-            y: 14 * k
-            width: root.vert ? 64 : parent.width / k - 28
-            height: root.vert ? parent.height / k - 28 : 64
-            radius: Theme.corner(32)
+	    transformOrigin: Item.TopLeft
+            x: root.vert ? (root.right_ ? fr : eg * k) + (root.right_ ? 80 : -80) * k * (1 - root.slide) : lg * k
+	    y: root.vert ? lg * k : eg * k
+	    visible: root.slide > 0
+	    width: root.vert ? 64 : parent.width / k - 2 * lg
+	    height: root.vert ? parent.height / k - 2 * lg : 64
+	    radius: flush ? 0 : rad 
             color: Theme.s1
-            border { width: 1; color: Theme.s2 }
+            border { width: flush ? 0 : 1; color: Theme.s2 }
 
             // the mark: a ring of dots, the center — red while something is recording
             Item {

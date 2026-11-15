@@ -153,7 +153,8 @@ Singleton {
 
     readonly property string riceState: (Quickshell.env("XDG_STATE_HOME") || Quickshell.env("HOME") + "/.local/state") + "/rice"
     readonly property bool barRight: st.barAt === "right"
-    readonly property real barPx: Math.ceil(78 * s * st.barSize / 100)
+    readonly property real barPx: Math.ceil((st.barStick ? 64 : 78) * s * st.barSize / 100)
+    readonly property real barFillet: st.barStick ? Math.ceil(corner(32) * s * st.barSize / 100) : 0
     // like in Rules: apply() at startup has to see glyph.json, not the defaults. Then settings from before the Style page move over, once
     function migrate() {
         if (st.match) {
@@ -248,6 +249,7 @@ Singleton {
             // their hot edge move left, volume/brightness — into the island (the right edge is taken)
 	    property string barAt: "left"
 	    property int barSize: 100      // bar thickness, % of the default
+	    property bool barStick: false  // no gap on the screen-edge side
             property var barHide: []       // screen names where the bar auto-hides (experimental), see bar/Bar.qml
             property bool barRight: false  // older setting, moved to barAt by migrate()
             property int glyphLights: 0    // where volume/brightness and progress light up: 0 at the edges, 1 in the island at the top

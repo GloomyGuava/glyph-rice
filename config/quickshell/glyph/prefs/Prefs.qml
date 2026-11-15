@@ -656,6 +656,7 @@ PanelWindow {
                     }
 		    Item { width: 1; height: 12 }
 		    Toggle { width: 200; text: "window title"; on: Theme.state.barTitle; onFlip: Theme.state.barTitle = !Theme.state.barTitle }
+		    Toggle { width: 200; text: "stick to edge"; on: Theme.state.barStick; onFlip: Theme.state.barStick = !Theme.state.barStick }
                     Lb { topPadding: 6; text: bar.onTop ? "left of the clock" : "above the clock"; px: 10 }
                     Item { width: 1; height: 6 }
                     Repeater {
