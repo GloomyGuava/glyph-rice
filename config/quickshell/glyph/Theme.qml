@@ -153,6 +153,7 @@ Singleton {
 
     readonly property string riceState: (Quickshell.env("XDG_STATE_HOME") || Quickshell.env("HOME") + "/.local/state") + "/rice"
     readonly property bool barRight: st.barAt === "right"
+    readonly property real barPx: Math.ceil(78 * s * st.barSize / 100)
     // like in Rules: apply() at startup has to see glyph.json, not the defaults. Then settings from before the Style page move over, once
     function migrate() {
         if (st.match) {
@@ -245,7 +246,8 @@ Singleton {
             property bool barTitle: true   // the window title along the bar
             // left, right or top; calendar, battery card, home, island and the Glyph flash follow it. On the right quick settings and
             // their hot edge move left, volume/brightness — into the island (the right edge is taken)
-            property string barAt: "left"
+	    property string barAt: "left"
+	    property int barSize: 100      // bar thickness, % of the default
             property var barHide: []       // screen names where the bar auto-hides (experimental), see bar/Bar.qml
             property bool barRight: false  // older setting, moved to barAt by migrate()
             property int glyphLights: 0    // where volume/brightness and progress light up: 0 at the edges, 1 in the island at the top

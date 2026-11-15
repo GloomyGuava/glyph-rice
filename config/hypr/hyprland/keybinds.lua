@@ -14,7 +14,7 @@ for _, key in ipairs({
     "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
     -- Super+<key> binds below
     "Q", "W", "E", "R", "T", "A", "D", "F", "G", "K", "L", "C", "V", "M", "N", "P",
-    "Z", "X", "U", "S", "H", "I", "space", "Escape",
+    "Z", "X", "U", "S", "H", "I", "Escape",
     "Comma", "Period", "Minus", "Equal", "Backslash",
     "left", "right", "up", "down",
     "Page_Up", "Page_Down", "F12", "Tab",

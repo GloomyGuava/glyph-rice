@@ -172,7 +172,7 @@ Scope {
         id: top
         shown: !!root.note && Theme.state.edges
         anchors.top: true
-        margins.top: Theme.state.barAt === "top" ? Math.ceil(78 * Theme.s) : 0 // under the bar
+        margins.top: Theme.state.barAt === "top" ? Theme.barPx : 0 // under the bar 
         implicitWidth: Math.ceil(640 * Theme.s)
         implicitHeight: Math.ceil(30 * Theme.s)
         Seg {

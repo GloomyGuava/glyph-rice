@@ -619,7 +619,7 @@ PanelWindow {
                             if (e.key !== Qt.Key_Left && e.key !== Qt.Key_Right && e.key !== Qt.Key_Space && e.key !== Qt.Key_Return) return;
                             const all = ["left", "right", "top"], back = e.key === Qt.Key_Left ? 2 : 1;
                             Theme.state.barAt = all[(all.indexOf(Theme.state.barAt) + back) % 3];
-                            e.accepted = true;
+			    e.accepted = true;
                         }
                         Repeater {
                             model: ["left", "right", "top"]
@@ -649,10 +649,13 @@ PanelWindow {
                                 }
                                 Lb { anchors.horizontalCenter: parent.horizontalCenter; text: ed.modelData; px: 10; color: ed.on ? Theme.fg : Theme.grey }
                             }
-                        }
+		    }
+
+		    Dial { label: "bar size · %"; from: 60; to: 120; step: 5; value: Theme.state.barSize; onMoved: v => Theme.state.barSize = v } // Bar width, %
+
                     }
-                    Item { width: 1; height: 12 }
-                    Toggle { width: 200; text: "window title"; on: Theme.state.barTitle; onFlip: Theme.state.barTitle = !Theme.state.barTitle }
+		    Item { width: 1; height: 12 }
+		    Toggle { width: 200; text: "window title"; on: Theme.state.barTitle; onFlip: Theme.state.barTitle = !Theme.state.barTitle }
                     Lb { topPadding: 6; text: bar.onTop ? "left of the clock" : "above the clock"; px: 10 }
                     Item { width: 1; height: 6 }
                     Repeater {
@@ -667,7 +670,7 @@ PanelWindow {
                                 if (!on) a.push(modelData.name);
                                 Theme.state.barHide = a;
                             }
-                        }
+		    }		    
                     }
                     Lb { visible: !bar.onTop; topPadding: 6; text: "auto-hide · experimental"; px: 10 }
                 }
@@ -994,7 +997,7 @@ PanelWindow {
                 Dial { id: gOut; label: "gaps out"; to: 60; value: root.r.gapsOut; onMoved: v => { root.r.gapsOut = v; Theme.apply(); } }
                 Dial { id: bord; label: "border"; to: 6; n: 24; value: root.r.border; onMoved: v => { root.r.border = v; Theme.apply(); } }
                 Dial { id: rnd; label: "rounding"; to: 40; value: Theme.state.rounding; onMoved: v => Theme.state.rounding = v } // shell.qml calls Theme.apply itself
-                Dial { id: pan; label: "panels"; to: 100; step: 5; value: Theme.state.corners; onMoved: v => Theme.state.corners = v } // the shell's corners, %
+		Dial { id: pan; label: "panels"; to: 100; step: 5; value: Theme.state.corners; onMoved: v => Theme.state.corners = v } // the shell's corners, %	
             }
 
             // game mode: starts by itself on a fullscreen game (services/Game), and what stays on in it. Off — game mode drops it

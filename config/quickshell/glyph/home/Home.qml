@@ -138,7 +138,7 @@ PanelWindow {
                     Icon {
                         anchors.horizontalCenter: parent.horizontalCenter
                         text: Weather.glyph(Weather.now?.code ?? 3, Weather.now?.day)
-                        font.pixelSize: 78
+                        font.pixelSize: Theme.barPx
                         layer.enabled: true
                         layer.effect: Dm { step: 4 }
                     }
