@@ -250,7 +250,8 @@ Singleton {
 	    property string barAt: "left"
 	    property int barSize: 100      // bar thickness, % of the default
 	    property bool barStick: false  // no gap on the screen-edge side
-            property var barHide: []       // screen names where the bar auto-hides (experimental), see bar/Bar.qml
+	    property var barHide: []       // screen names where the bar auto-hides (experimental), see bar/Bar.qml
+	    property bool lyrics: false    // lyrics in the music card
             property bool barRight: false  // older setting, moved to barAt by migrate()
             property int glyphLights: 0    // where volume/brightness and progress light up: 0 at the edges, 1 in the island at the top
             // workspaces (System → workspaces, the count — also in the overview): how many per group of ten, whether ±1 wraps,

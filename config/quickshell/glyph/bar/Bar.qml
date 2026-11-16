@@ -348,13 +348,13 @@ PopupWindow {
         Rectangle {
             id: mcard
             width: 520
-            height: 210
+            height: mc.implicitHeight
             radius: Theme.corner(36)
             color: Theme.s1
             border { width: 1; color: Theme.s2 }
             opacity: musicPop.t
             transform: Translate { x: root.vert ? (root.right_ ? 16 : -16) * (1 - musicPop.t) : 0; y: root.vert ? 0 : -16 * (1 - musicPop.t) }
-            MusicCard { anchors.fill: parent; active: musicPop.visible }
+            MusicCard { id: mc; anchors.fill: parent; active: musicPop.visible }
         }
     }
 }

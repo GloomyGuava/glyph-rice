@@ -4,6 +4,7 @@ import Quickshell
 import Quickshell.Services.Mpris
 import QtQuick
 
+
 // the active player (the playing one or the first)
 Singleton {
     id: root
@@ -20,11 +21,11 @@ Singleton {
 
     // the mpris position has to be polled
     Timer {
-        running: root.playing
-        interval: 500
+	running: root.playing
+	interval: Lyrics.active ? 250 : 500
         repeat: true
-        onTriggered: root.position = root.player?.position ?? 0
-    }
+	onTriggered: root.position = root.player?.position ?? 0
+     }
 
     // a new track: the position at once, without waiting for the poll
     readonly property string track: player ? `${player.trackArtist}\n${player.trackTitle}` : ""
