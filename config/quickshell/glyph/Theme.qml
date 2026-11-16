@@ -277,7 +277,7 @@ Singleton {
     // deck sections
     readonly property var decks: ["clock", "weather", "perf", "net", "media"]
     // bar tray
-    readonly property var bars: ["layout", "wifi", "bluetooth", "sound", "notes", "battery", "mode", "power", "cat"]
+    readonly property var bars: ["layout", "wifi", "bluetooth", "sound", "notes", "battery", "mode", "power", "cat", "music"]
 
     // ---- the look of everything outside the shell. Only shell.qml calls it: at startup and on a theme or color change ----
     // hypr inherits demonshot: monitor, input, idle, night light and motion are set by its Rules (shell.qml), animations — from the

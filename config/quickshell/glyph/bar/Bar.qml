@@ -34,8 +34,10 @@ PanelWindow {
     // edge. Rest there and the pill slides in over the windows; leave it and it slides back out. From Isaqdn03/glyph-rice
     readonly property bool autoHide: vert && Theme.state.barHide.includes(screen?.name ?? "")
     property bool hov: false
-    readonly property bool shown: !autoHide || hov || powOpen || pop.visible
+    readonly property bool shown: !autoHide || hov || powOpen || pop.visible || musicPop.visible
     property real slide: shown ? 1 : 0
+    property bool musicOpen: false
+    property point musicAt
     Behavior on slide { NumberAnimation { duration: Theme.t; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.glide } }
     exclusionMode: autoHide ? ExclusionMode.Ignore : (Theme.barFillet > 0 ? ExclusionMode.Normal : ExclusionMode.Auto)
     exclusiveZone: Theme.barPx 
@@ -271,8 +273,8 @@ Fillet {
                         id: part
                         required property string modelData
                         readonly property bool quick: modelData !== "mode" && modelData !== "power"
-                        sourceComponent: root.parts[modelData] ?? null
-                        visible: !!sourceComponent && (modelData !== "battery" || root.bat.isLaptopBattery)
+			sourceComponent: root.parts[modelData] ?? null
+			visible: !!sourceComponent && (modelData !== "battery" || root.bat.isLaptopBattery) && (modelData !== "music" || !!Media.player)
                         TapHandler { enabled: part.quick; onTapped: root.trayClicked() }
                         HoverHandler { enabled: part.quick; cursorShape: Qt.PointingHandCursor }
                     }
@@ -280,7 +282,7 @@ Fillet {
             }
         }
     }
-    readonly property var parts: ({ layout: layoutC, wifi: wifiC, bluetooth: btC, sound: soundC, notes: notesC, battery: batC, mode: modeC, power: powerC, cat: catC })
+    readonly property var parts: ({ layout: layoutC, wifi: wifiC, bluetooth: btC, sound: soundC, notes: notesC, battery: batC, mode: modeC, power: powerC, cat: catC, music: musicC })
     Component { id: layoutC; Lb { text: Sys.layout; px: 10 } }
     // the RunCat cat: the more cpu, the faster it runs (250 ms a frame idle, 50 at full load). cpu is polled while it's in the tray;
     // the Binding isn't in the delegate — a destroyed one doesn't restore the value. Grey as is, lost on white in the light theme — black there, like buds
@@ -321,7 +323,41 @@ Fillet {
                 PathAngleArc { centerX: 10; centerY: 15; radiusX: 1.9; radiusY: 1.9; startAngle: 0; sweepAngle: 360 }
             }
         }
+}
+
+Component {
+    id: musicC
+    MusicRing { onClicked: { root.musicAt = mapToItem(pill, width, height); root.musicOpen = !root.musicOpen; } }
+}
+
+HyprlandFocusGrab { windows: [musicPop, root]; active: root.musicOpen; onCleared: root.musicOpen = false }
+
+PopupWindow {
+    id: musicPop
+    property real t: root.musicOpen ? 1 : 0
+    Behavior on t { NumberAnimation { duration: Theme.t; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.glide } }
+    visible: t > 0
+    anchor.item: pill
+    anchor.rect: root.vert ? Qt.rect(root.right_ ? -14 : pill.width + 14, root.musicAt.y, 1, 1) : Qt.rect(root.musicAt.x, pill.height + 14, 1, 1)
+    anchor.edges: Edges.Top | Edges.Left
+    anchor.gravity: root.vert ? Edges.Top | (root.right_ ? Edges.Left : Edges.Right) : Edges.Bottom | Edges.Left
+    implicitWidth: Math.ceil(520 * Theme.s)
+    implicitHeight: Math.ceil(mcard.height * Theme.s)
+    color: "transparent"
+    Stage {
+        Rectangle {
+            id: mcard
+            width: 520
+            height: 210
+            radius: Theme.corner(36)
+            color: Theme.s1
+            border { width: 1; color: Theme.s2 }
+            opacity: musicPop.t
+            transform: Translate { x: root.vert ? (root.right_ ? 16 : -16) * (1 - musicPop.t) : 0; y: root.vert ? 0 : -16 * (1 - musicPop.t) }
+            MusicCard { anchors.fill: parent; active: musicPop.visible }
+        }
     }
+}
     Component {
         id: btC
         Icon {
