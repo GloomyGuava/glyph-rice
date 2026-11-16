@@ -64,8 +64,8 @@ Item {
     }
 
     Lb {
-        visible: ["idle", "loading", "none", "instrumental", "error"].includes(Lyrics.status)
-        anchors.centerIn: parent
-        text: ({ idle: "idle · nothing requested", loading: "fetching…", none: "no lyrics for this track", instrumental: "instrumental", error: "couldn't reach lrclib.net" })[Lyrics.status] ?? ""
+        visible: ["idle", "loading", "none", "instrumental", "error", "skip"].includes(Lyrics.status)
+	anchors.centerIn: parent
+	text: ({ idle: "fetching…", loading: "fetching…", none: "no lyrics for this track", instrumental: "instrumental", error: "couldn't reach lrclib.net", skip: "lyrics: spotify only" })[Lyrics.status] ?? ""
     }
 }

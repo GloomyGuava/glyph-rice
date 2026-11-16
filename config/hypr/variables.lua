@@ -31,7 +31,7 @@ return {
     apps                       = {
         sysmon        = "kitty --class btop -T btop btop",
         music         = "spotify-launcher",
-        communication = "Telegram",
+        communication = "Discord",
     },
 
     -- Touchpad
@@ -103,7 +103,7 @@ return {
     kbPinWindow                = "SUPER + SHIFT + P", -- Super+P — the vpn pact
     kbWindowFullscreen         = "SUPER + F",
     kbWindowBorderedFullscreen = "SUPER + ALT + F",
-    kbToggleWindowFloating     = "SUPER + ALT + space",
+    kbToggleWindowFloating     = "SUPER + T",
     kbCloseWindow              = "SUPER + Q",
 
     -- Special workspaces toggles
@@ -122,7 +122,7 @@ return {
     -- Misc
     kbSession                  = "CTRL + ALT + Delete",
     kbPower                    = "SUPER + Escape",
-    kbAltar                    = "SUPER + SHIFT + A",
+    kbAltar                    = "SUPER + Z",
     kbLock                     = "SUPER + CTRL + L",
     kbRestoreLock              = "SUPER + ALT + L",
 }

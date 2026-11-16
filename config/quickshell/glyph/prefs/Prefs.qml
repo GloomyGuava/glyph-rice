@@ -31,7 +31,7 @@ PanelWindow {
         battery: "\u{F0079}", buds: "\u{F02CB}", player: "\u{F040A}", system: "\u{F0128}", cat: "\u{F011B}", cava: "\u{F0EA2}", photo: "\u{F02E9}",
         clock: "\u{F0150}", perf: "\u{F04C5}", net: "\u{F05A9}", media: "\u{F075A}",
         layout: "\u{F030C}", wifi: "\u{F05A9}", bluetooth: "\u{F00AF}", sound: "\u{F057E}", notes: "\u{F009A}", music: "\u{F075A}",
-        mode: "\u{F04C5}", power: "\u{F0425}"
+        mode: "\u{F04C5}", power: "\u{F0425}", systray: "\u{F015C}"
     })
     // round home widgets, the rest — a 40 square. ponytail: ram/gpu/disk/battery — a guess (rings); if Home decides otherwise — fix it
     readonly property var rounds: ["weather", "cpu", "ram", "gpu", "disk", "battery", "buds", "cava"]
@@ -657,6 +657,7 @@ PanelWindow {
 		    Item { width: 1; height: 12 }
 		    Toggle { width: 200; text: "window title"; on: Theme.state.barTitle; onFlip: Theme.state.barTitle = !Theme.state.barTitle }
 		    Toggle { width: 200; text: "stick to edge"; on: Theme.state.barStick; onFlip: Theme.state.barStick = !Theme.state.barStick }
+		    Toggle { visible: bar.onTop; width: 200; text: "lyrics in bar"; on: Theme.state.barLyrics; onFlip: Theme.state.barLyrics = !Theme.state.barLyrics }
                     Lb { topPadding: 6; text: bar.onTop ? "left of the clock" : "above the clock"; px: 10 }
                     Item { width: 1; height: 6 }
                     Repeater {

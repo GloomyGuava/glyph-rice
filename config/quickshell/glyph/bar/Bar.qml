@@ -11,7 +11,7 @@ import qs
 import qs.components
 import qs.services
 import qs.settings
-
+import Quickshell.Services.SystemTray
 
 // bar: a pill at the left or right edge, or along the top — Theme.state.barAt. First the mark (a ring of 16 dots) — the launcher, the center
 // turns red while recording or the microphone is on. Workspaces as dots, the window title, a Doto clock in the center, the tray last — a click
@@ -39,6 +39,8 @@ PanelWindow {
     property bool musicOpen: false
     property point musicAt
     Behavior on slide { NumberAnimation { duration: Theme.t; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.glide } }
+    readonly property bool barLyr: !vert && Theme.state.barLyrics && Theme.state.bar.includes("music") && !!Media.player
+    Binding { target: Lyrics; property: "active"; value: (musicPop.visible && Theme.state.lyrics) || root.barLyr }
     exclusionMode: autoHide ? ExclusionMode.Ignore : (Theme.barFillet > 0 ? ExclusionMode.Normal : ExclusionMode.Auto)
     exclusiveZone: Theme.barPx 
     mask: Region { item: root.shown ? hitAll : hitEdge }
@@ -278,11 +280,15 @@ Fillet {
                         TapHandler { enabled: part.quick; onTapped: root.trayClicked() }
                         HoverHandler { enabled: part.quick; cursorShape: Qt.PointingHandCursor }
                     }
-                }
-            }
-        }
-    }
-    readonly property var parts: ({ layout: layoutC, wifi: wifiC, bluetooth: btC, sound: soundC, notes: notesC, battery: batC, mode: modeC, power: powerC, cat: catC, music: musicC })
+	    }
+
+	    
+	}
+
+	         }
+	 }
+
+    readonly property var parts: ({ layout: layoutC, wifi: wifiC, bluetooth: btC, sound: soundC, notes: notesC, battery: batC, mode: modeC, power: powerC, cat: catC, music: musicC, systray: sysTrayC })
     Component { id: layoutC; Lb { text: Sys.layout; px: 10 } }
     // the RunCat cat: the more cpu, the faster it runs (250 ms a frame idle, 50 at full load). cpu is polled while it's in the tray;
     // the Binding isn't in the delegate — a destroyed one doesn't restore the value. Grey as is, lost on white in the light theme — black there, like buds
@@ -297,8 +303,13 @@ Fillet {
             layer.enabled: Theme.light
             layer.effect: MultiEffect { brightness: -1 }
         }
-    }
-    Binding { target: SysStats; property: "cat"; value: Theme.state.bar.includes("cat") }
+}
+Binding { target: SysStats; property: "cat"; value: Theme.state.bar.includes("cat") }
+
+    // System Tray
+    Component { id: sysTrayC; SysTray {} }
+
+
     // network: two arcs and a dot, round ends like the battery; off — a slash
     Component {
         id: wifiC
@@ -327,7 +338,28 @@ Fillet {
 
 Component {
     id: musicC
-    MusicRing { onClicked: { root.musicAt = mapToItem(pill, width, height); root.musicOpen = !root.musicOpen; } }
+    Row {
+	spacing: 10
+	Text {
+            id: lt
+            visible: root.barLyr && Lyrics.status === "ok"
+            anchors.verticalCenter: parent.verticalCenter
+            readonly property string cur: Lyrics.lines[Lyrics.index]?.s ?? ""
+	    width: 320
+            elide: Text.ElideRight
+            textFormat: Text.PlainText
+            text: cur
+            font { family: Theme.ui; pixelSize: 18; weight: Font.Bold }
+            color: Theme.fg
+            onCurChanged: fade.restart()
+            NumberAnimation { id: fade; target: lt; property: "opacity"; from: 0; to: 1; duration: 220 }
+        }
+        MusicRing {
+            anchors.verticalCenter: parent.verticalCenter
+            onClicked: { root.musicAt = mapToItem(pill, width, height); root.musicOpen = !root.musicOpen; }
+        }
+
+    }
 }
 
 HyprlandFocusGrab { windows: [musicPop, root]; active: root.musicOpen; onCleared: root.musicOpen = false }

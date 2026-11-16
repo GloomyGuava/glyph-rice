@@ -18,6 +18,17 @@ Singleton {
     property string loadedKey: ""
     property string fetchKey: ""
 
+    // lyrics are looked up only for these players (matched against the MPRIS name and desktop entry, lowercase)
+    readonly property var only: ["spotify"]
+    readonly property bool allowed: {
+        const id = ((player?.identity ?? "") + " " + (player?.desktopEntry ?? "")).toLowerCase();
+        return only.some(n => id.includes(n));
+    }
+    onAllowedChanged: {
+        if (!allowed) { proc.running = false; lines = []; plain = ""; loadedKey = ""; status = "skip"; }
+        deb.restart();
+    }
+
     // the line being sung: the last one whose time has come (a little look-ahead, the position is polled twice a second)
     readonly property int index: {
         const p = Media.position + 0.3, ls = lines;
@@ -31,7 +42,7 @@ Singleton {
 
     onActiveChanged: { if (!active) proc.running = false; deb.restart(); }
     onKeyChanged: {
-        if (key !== loadedKey) { lines = []; plain = ""; status = "idle"; }
+        if (key !== loadedKey) { lines = []; plain = ""; status = allowed ? "idle" : "skip"; }
         deb.restart();
     }
     Timer { id: deb; interval: 400; onTriggered: root.fetch() }
@@ -46,8 +57,8 @@ Singleton {
     }
 
     function fetch() {
-        if (!active || !player?.trackTitle || key === loadedKey) return;
-        proc.running = false;
+        if (!active || !allowed || !player?.trackTitle || key === loadedKey) return;
+	proc.running = false;
         fetchKey = key;
         status = "loading";
         ask("get");
